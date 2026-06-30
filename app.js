@@ -2,6 +2,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatContainer = document.getElementById('chat-container');
     const form = document.getElementById('nexus-form');
     const input = document.getElementById('user-input');
+    const cashFlowDisplay = document.getElementById('cash-flow');
+
+    const Dashboard = {
+        actualizar: async function() {
+            const { data, error } = await supabase.from('ventas').select('monto, tipo');
+            if (error) return;
+            let saldo = 0;
+            data.forEach(v => { v.tipo === 'ingreso' ? saldo += v.monto : saldo -= v.monto; });
+            cashFlowDisplay.textContent = `$${saldo.toLocaleString()}`;
+        }
+    };
+
+    Dashboard.actualizar();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -15,15 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (accion.comando === 'REGISTRO_CONTABLE') {
             await CloudManager.guardarVenta(accion.datos);
+            await Dashboard.actualizar();
             agregarMensaje(accion.plantilla);
             
-            // Viralización rápida
+            // Mecanismo de viralización (BOFU)
             if (navigator.share) {
-                navigator.share({
-                    title: 'NEXUS OS',
-                    text: `Registro en mi negocio: ${accion.plantilla}`,
-                    url: 'https://solvensamoris.github.io/'
-                });
+                setTimeout(() => {
+                    if (confirm("¿Quieres compartir este registro y promocionar NEXUS OS?")) {
+                        navigator.share({
+                            title: 'NEXUS OS',
+                            text: `Acabo de registrar: ${accion.plantilla}. ¡Llevo mi negocio con NEXUS OS!`,
+                            url: 'https://solvensamoris.github.io/'
+                        });
+                    }
+                }, 1000);
             }
         } else {
             agregarMensaje(accion.plantilla);
