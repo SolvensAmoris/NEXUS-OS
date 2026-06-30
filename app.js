@@ -9,13 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (cashFlowDisplay) cashFlowDisplay.textContent = `$${data.caja.toLocaleString('es-MX')} MXN`;
 
-    function agregarMensaje(texto, esUsuario = false) {
+    function agregarMensaje(texto, esUsuario = false, esSistema = false) {
         const div = document.createElement('div');
         div.className = `flex gap-3 ${esUsuario ? 'flex-row-reverse' : ''} mb-4`;
+        
+        const avatar = esSistema 
+            ? `<div class="w-8 h-8 rounded-full bg-emerald-900 flex items-center justify-center animate-spin text-xs">⚙️</div>`
+            : `<div class="w-8 h-8 rounded border ${esUsuario ? 'border-slate-600 bg-slate-700' : 'border-emerald-500 bg-slate-800'} flex items-center justify-center font-bold text-xs shrink-0 text-emerald-400">${esUsuario ? 'Tú' : 'N'}</div>`;
+        
         div.innerHTML = `
-            <div class="w-8 h-8 rounded border ${esUsuario ? 'border-slate-600 bg-slate-700' : 'border-emerald-500 bg-slate-800'} flex items-center justify-center font-bold text-xs shrink-0 text-emerald-400">
-                ${esUsuario ? 'Tú' : 'N'}
-            </div>
+            ${avatar}
             <div class="${esUsuario ? 'bg-slate-800 border border-slate-700' : 'glass-panel text-emerald-50'} p-3 rounded-2xl ${esUsuario ? 'rounded-tr-none' : 'rounded-tl-none'} text-sm max-w-[85%] leading-relaxed">
                 ${texto}
             </div>`;
@@ -31,7 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
         agregarMensaje(texto, true);
         input.value = '';
         
+        // Estado de "Procesando"
+        agregarMensaje("Analizando instrucciones...", false, true);
+        
         const accion = await Agent.procesarInstruccion(texto);
+        
+        // Eliminar mensaje de "Analizando"
+        chatContainer.removeChild(chatContainer.lastChild);
+        
         let respuesta = "";
 
         if (accion.comando !== 'REGISTRO_CONTABLE') {
@@ -47,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const nuevoSaldo = StorageManager.registrarMovimiento(tipo, parseInt(monto[0]));
                     if (cashFlowDisplay) cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')} MXN`;
                     
-                    // Loop de Viralización integrado
                     const viralComponent = `
                         <div class="mt-3 p-3 bg-emerald-900/20 border border-emerald-500/30 rounded-xl text-xs">
                             <p class="text-emerald-300 font-bold mb-1">🎁 ¡Tu negocio está creciendo!</p>
