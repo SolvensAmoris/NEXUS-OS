@@ -5,26 +5,34 @@ const Agent = {
         const monto = montoMatch ? parseInt(montoMatch[0]) : null;
 
         if (!monto) {
-            return { comando: 'ERROR', plantilla: '⚠️ ¿De cuánto fue la cantidad?' };
+            return { 
+                comando: 'ERROR', 
+                plantilla: '⚠️ Para registrar una transacción, necesito el monto. ¿De cuánto fue?' 
+            };
         }
 
-        // Inferir tipo
         const tipo = lower.includes('gasto') || lower.includes('compra') ? 'egreso' : 'ingreso';
         
-        // Autoclasificación inteligente
-        let categoria = 'general';
-        if (lower.includes('servicio') || lower.includes('asesoría')) categoria = 'servicio';
-        else if (lower.includes('comida') || lower.includes('alimento')) categoria = 'alimentos';
-        else if (lower.includes('renta') || lower.includes('luz')) categoria = 'fijos';
+        // Extracción inteligente de cliente
+        // Busca patrones como "a juan", "para maria", "de pedro"
+        const clienteMatch = lower.match(/(?:a|para|de)\s+([a-z]+)/);
+        const cliente = clienteMatch ? clienteMatch[1] : 'anonimo';
 
-        // Estado
+        let categoria = lower.includes('servicio') ? 'servicio' : 'general';
         let estado = lower.includes('crédito') || lower.includes('fiao') ? 'credito' : 'pagado';
         if (lower.includes('abono')) estado = 'abono';
 
         return {
             comando: 'REGISTRO_CONTABLE',
-            datos: { tipo, monto, categoria, estado, cliente: 'anonimo', fecha: new Date().toISOString() },
-            plantilla: `✅ ${tipo.toUpperCase()} de $${monto} registrado como ${categoria} (${estado}).`
+            datos: { 
+                tipo, 
+                monto, 
+                categoria, 
+                estado, 
+                cliente: cliente, 
+                fecha: new Date().toISOString() 
+            },
+            plantilla: `✅ ${tipo.toUpperCase()} de $${monto} con ${cliente} registrado como ${estado}.`
         };
     }
 };
