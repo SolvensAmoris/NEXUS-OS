@@ -13,35 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const accion = await Agent.procesarInstruccion(texto);
         
-        // Lógica para manejar reporte o registro
         if (accion.comando === 'REPORTE_EJECUTIVO') {
-            const { data, error } = await supabase.from('ventas').select('monto, cliente, estado').eq('estado', 'credito');
-            if (error) {
-                agregarMensaje("❌ Error al consultar cuentas.");
-            } else {
-                let mensajeResumen = "📊 **Cuentas por Cobrar:**\n";
-                if (data.length === 0) {
-                    mensajeResumen = "✅ No tienes deudas pendientes.";
-                } else {
-                    data.forEach(v => mensajeResumen += `- ${v.cliente.toUpperCase()}: $${v.monto}\n`);
-                }
-                agregarMensaje(mensajeResumen);
-            }
+            const { data } = await supabase.from('ventas').select('monto, cliente').eq('estado', 'credito');
+            let mensaje = data && data.length ? data.map(v => `- ${v.cliente}: $${v.monto}`).join('\n') : "✅ Todo pagado.";
+            agregarMensaje(`📊 **Cuentas por Cobrar:**\n${mensaje}`);
         } else if (accion.comando === 'REGISTRO_CONTABLE') {
             await CloudManager.guardarVenta(accion.datos);
             agregarMensaje(accion.plantilla);
-            
-            if (navigator.share) {
-                setTimeout(() => {
-                    if (confirm("¿Quieres compartir este registro?")) {
-                        navigator.share({
-                            title: 'NEXUS OS',
-                            text: `Registro: ${accion.plantilla}. ¡Uso NEXUS OS!`,
-                            url: 'https://solvensamoris.github.io/'
-                        });
-                    }
-                }, 1000);
-            }
         } else {
             agregarMensaje(accion.plantilla);
         }
