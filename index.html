@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS OS | Copilot</title>
+    <title>NEXUS OS | Business Copilot</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,20 +14,20 @@
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
-    <header class="p-4 glass-panel flex justify-between items-center z-10">
-        <h1 class="text-xl font-bold text-emerald-400">● NEXUS OS</h1>
+    <header class="p-4 glass-panel flex justify-between items-center z-10 border-b border-emerald-900/30">
+        <h1 class="text-xl font-black text-emerald-400 tracking-tighter">NEXUS OS</h1>
         <div class="flex items-center gap-3">
             <div class="text-right">
-                <span class="text-slate-400 text-[10px] block">Flujo</span>
-                <span class="font-bold text-amber-400 text-sm" id="cash-flow">$0.00 MXN</span>
+                <span class="text-slate-500 text-[9px] block uppercase">Flujo Caja</span>
+                <span class="font-bold text-amber-400 text-sm" id="cash-flow">$0.00</span>
             </div>
-            <button onclick="StorageManager.exportarCSV()" class="text-[10px] bg-slate-800 px-2 py-1 rounded text-emerald-400 border border-emerald-900">↓ CSV</button>
+            <button onclick="StorageManager.exportarCSV()" class="text-[10px] bg-slate-800 px-2 py-1 rounded text-emerald-400 border border-emerald-900 hover:bg-emerald-900 transition-all">↓ CSV</button>
         </div>
     </header>
 
-    <div id="report-panel" class="px-4 py-2">
-        <div class="glass-panel p-4 rounded-2xl">
-            <canvas id="myChart" height="80"></canvas>
+    <div id="report-panel" class="px-4 py-3">
+        <div class="glass-panel p-3 rounded-2xl">
+            <canvas id="myChart" height="70"></canvas>
         </div>
     </div>
 
@@ -35,8 +35,10 @@
 
     <footer class="fixed bottom-0 w-full p-4 bg-[#0B0F19] border-t border-emerald-900/30">
         <form id="nexus-form" class="flex gap-2">
-            <input type="text" id="user-input" autocomplete="off" placeholder="Ej: Venta 850..." class="flex-1 bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500">
-            <button type="submit" class="bg-emerald-600 text-white rounded-xl px-4 py-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg></button>
+            <input type="text" id="user-input" autocomplete="off" placeholder="Ej: Venta 500..." class="flex-1 bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500">
+            <button type="submit" class="bg-emerald-600 text-white rounded-xl px-4 py-3 hover:bg-emerald-500 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+            </button>
         </form>
     </footer>
 
