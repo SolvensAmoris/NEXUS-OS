@@ -1,30 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const data = StorageManager.init();
     const chatContainer = document.getElementById('chat-container');
     const form = document.getElementById('nexus-form');
     const input = document.getElementById('user-input');
     const cashFlowDisplay = document.getElementById('cash-flow');
-    const ctx = document.getElementById('myChart').getContext('2d');
-    
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: { labels: ['Inicio'], datasets: [{ data: [data.caja], borderColor: '#10B981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.1)' }] },
-        options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
-    });
 
-    function refreshUI(nuevoSaldo) {
-        cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')}`;
-        chart.data.datasets[0].data.push(nuevoSaldo);
-        chart.update();
-    }
+    // Dashboard Dinámico: Cargar datos reales
+    const Dashboard = {
+        actualizar: async function() {
+            const { data, error } = await supabase.from('ventas').select('monto, tipo');
+            if (error) return;
 
-    function agregarMensaje(texto, esUsuario = false, esSistema = false) {
-        const div = document.createElement('div');
-        div.className = `flex gap-3 ${esUsuario ? 'flex-row-reverse' : ''} mb-4`;
-        div.innerHTML = `<div class="w-8 h-8 rounded border ${esUsuario ? 'border-slate-600 bg-slate-700' : 'border-emerald-500 bg-slate-800'} flex items-center justify-center font-bold text-xs shrink-0 text-emerald-400">${esUsuario ? 'Tú' : 'N'}</div><div class="${esUsuario ? 'bg-slate-800 border border-slate-700' : 'glass-panel text-emerald-50'} p-3 rounded-2xl ${esUsuario ? 'rounded-tr-none' : 'rounded-tl-none'} text-sm max-w-[85%]">${texto}</div>`;
-        chatContainer.appendChild(div);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
+            let saldo = 0;
+            data.forEach(v => {
+                if (v.tipo === 'ingreso') saldo += v.monto;
+                if (v.tipo === 'egreso') saldo -= v.monto;
+            });
+            cashFlowDisplay.textContent = `$${saldo.toLocaleString()}`;
+        }
+    };
+
+    Dashboard.actualizar();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -37,20 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const accion = await Agent.procesarInstruccion(texto);
         
         if (accion.comando === 'REGISTRO_CONTABLE') {
-            const monto = texto.match(/\d+/);
-            if (monto) {
-                const montoVal = parseInt(monto[0]);
-                const tipo = texto.toLowerCase().includes('gasto') ? 'egreso' : 'ingreso';
-                const nuevoSaldo = StorageManager.registrarMovimiento(tipo, montoVal);
-                
-                // Conexión a la nube
-                await CloudManager.guardarVenta({ tipo, monto: montoVal, fecha: new Date().toISOString() });
-                
-                refreshUI(nuevoSaldo);
-                agregarMensaje(`Registro exitoso. Saldo actual: $${nuevoSaldo.toLocaleString('es-MX')}.`);
-            }
+            await CloudManager.guardarVenta(accion.datos);
+            await Dashboard.actualizar(); // Recalcular saldo
+            agregarMensaje(accion.plantilla);
         } else {
             agregarMensaje(accion.plantilla);
         }
     });
+
+    function agregarMensaje(texto, esUsuario = false) {
+        const div = document.createElement('div');
+        div.className = `flex gap-3 ${esUsuario ? 'flex-row-reverse' : ''} mb-4`;
+        div.innerHTML = `<div class="w-8 h-8 rounded border ${esUsuario ? 'border-slate-600' : 'border-emerald-500'} flex items-center justify-center font-bold text-[10px]">${esUsuario ? 'Tú' : 'N'}</div><div class="${esUsuario ? 'bg-slate-800' : 'glass-panel'} p-3 rounded-2xl text-sm max-w-[85%]">${texto}</div>`;
+        chatContainer.appendChild(div);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
 });
