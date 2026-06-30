@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NEXUS OS | Copilot</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0B0F19; color: #E2E8F0; }
@@ -13,36 +14,34 @@
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
-
     <header class="p-4 glass-panel flex justify-between items-center z-10">
         <h1 class="text-xl font-bold text-emerald-400">● NEXUS OS</h1>
-        <div class="text-right">
-            <span class="text-slate-400 text-[10px] block">Flujo de Caja</span>
-            <span class="font-bold text-amber-400 text-sm" id="cash-flow">$0.00 MXN</span>
+        <div class="flex items-center gap-3">
+            <div class="text-right">
+                <span class="text-slate-400 text-[10px] block">Flujo</span>
+                <span class="font-bold text-amber-400 text-sm" id="cash-flow">$0.00 MXN</span>
+            </div>
+            <button onclick="StorageManager.exportarCSV()" class="text-[10px] bg-slate-800 px-2 py-1 rounded text-emerald-400 border border-emerald-900">↓ CSV</button>
         </div>
     </header>
 
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col pb-24">
-        <div class="glass-panel p-4 rounded-2xl rounded-tl-none text-sm text-emerald-50">
-            <span class="font-bold text-emerald-400 block mb-2">🚀 Escribe algo como:</span>
-            • Venta de servicio 1500<br>
-            • Enviar mensaje de cobranza<br>
-            • Generar datos de factura
+    <div id="report-panel" class="px-4 py-2">
+        <div class="glass-panel p-4 rounded-2xl">
+            <canvas id="myChart" height="80"></canvas>
         </div>
-    </main>
+    </div>
+
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col pb-24"></main>
 
     <footer class="fixed bottom-0 w-full p-4 bg-[#0B0F19] border-t border-emerald-900/30">
         <form id="nexus-form" class="flex gap-2">
-            <input type="text" id="user-input" autocomplete="off" placeholder="Ej: Venta 850..." 
-                class="flex-1 bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500">
-            <button type="submit" class="bg-emerald-600 text-white rounded-xl px-4 py-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-            </button>
+            <input type="text" id="user-input" autocomplete="off" placeholder="Ej: Venta 850..." class="flex-1 bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500">
+            <button type="submit" class="bg-emerald-600 text-white rounded-xl px-4 py-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg></button>
         </form>
     </footer>
 
-    <script src="storage/storage.js"></script>
-    <script src="agents/agent.js"></script>
-    <script src="app.js"></script>
+    <script src="/storage/storage.js"></script>
+    <script src="/agents/agent.js"></script>
+    <script src="/app.js"></script>
 </body>
 </html>
