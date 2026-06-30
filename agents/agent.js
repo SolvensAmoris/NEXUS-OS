@@ -1,40 +1,32 @@
 const Agent = {
     procesarInstruccion: async function(texto) {
-        const lowerTexto = texto.toLowerCase();
-        
-        // Extracción de datos
-        const montoMatch = lowerTexto.match(/(\d+)/);
+        const lower = texto.toLowerCase();
+        const montoMatch = lower.match(/(\d+)/);
         const monto = montoMatch ? parseInt(montoMatch[0]) : null;
-        
+
         if (!monto) {
             return {
                 comando: 'ERROR',
-                plantilla: '⚠️ Para registrar una transacción, necesito el monto. Por favor, especifica la cantidad.'
+                plantilla: '⚠️ Para registrar una transacción, necesito el monto. ¿De cuánto fue?'
             };
         }
 
-        // Determinación de tipo y entidad
-        const tipo = lowerTexto.includes('gasto') || lowerTexto.includes('compra') ? 'egreso' : 'ingreso';
-        const cliente = this.detectarEntidad(lowerTexto, ['juan', 'maria', 'empresa', 'cliente']);
-        const categoria = lowerTexto.includes('servicio') ? 'servicio' : 'general';
+        // Inteligencia: Detectar condiciones de venta
+        let estado = 'pagado';
+        if (lower.includes('crédito') || lower.includes('fiao') || lower.includes('pendiente')) estado = 'credito';
+        if (lower.includes('abono') || lower.includes('parcial')) estado = 'abono';
+
+        const tipo = lower.includes('gasto') || lower.includes('compra') ? 'egreso' : 'ingreso';
 
         return {
             comando: 'REGISTRO_CONTABLE',
             datos: {
-                tipo: tipo,
-                monto: monto,
-                cliente: cliente,
-                categoria: categoria,
+                tipo,
+                monto,
+                estado,
                 fecha: new Date().toISOString()
             },
-            plantilla: `✅ Registro procesado: ${tipo.toUpperCase()} de $${monto} registrado con éxito.`
+            plantilla: `✅ ${tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} de $${monto} registrado como: ${estado}.`
         };
-    },
-
-    detectarEntidad: function(texto, lista) {
-        for (let item of lista) {
-            if (texto.includes(item)) return item;
-        }
-        return 'anonimo';
     }
 };
