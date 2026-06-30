@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="w-8 h-8 rounded border ${esUsuario ? 'border-slate-600 bg-slate-700' : 'border-emerald-500 bg-slate-800'} flex items-center justify-center font-bold text-xs shrink-0 text-emerald-400">
                 ${esUsuario ? 'Tú' : 'N'}
             </div>
-            <div class="${esUsuario ? 'bg-slate-800 border border-slate-700' : 'glass-panel'} p-3 rounded-2xl text-sm max-w-[85%] text-emerald-50">
+            <div class="${esUsuario ? 'bg-slate-800 border border-slate-700' : 'glass-panel text-emerald-50'} p-3 rounded-2xl ${esUsuario ? 'rounded-tr-none' : 'rounded-tl-none'} text-sm max-w-[85%] leading-relaxed">
                 ${texto}
             </div>`;
         chatContainer.appendChild(div);
@@ -35,14 +35,31 @@ document.addEventListener('DOMContentLoaded', () => {
         let respuesta = "";
 
         if (accion.comando !== 'REGISTRO_CONTABLE') {
-            respuesta = `Agente activo: ${accion.comando}. Ejecutando automatización...`;
+            respuesta = accion.plantilla;
         } else {
             const monto = texto.match(/\d+/);
             if (monto) {
-                const tipo = texto.toLowerCase().includes('gasto') ? 'egreso' : 'ingreso';
-                const nuevoSaldo = StorageManager.registrarMovimiento(tipo, parseInt(monto[0]));
-                if (cashFlowDisplay) cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')} MXN`;
-                respuesta = `Registro exitoso en Códice.`;
+                const validacion = Agent.validarMonto(parseInt(monto[0]));
+                if (!validacion.valido) {
+                    respuesta = `⚠️ Error: ${validacion.error}`;
+                } else {
+                    const tipo = texto.toLowerCase().includes('gasto') ? 'egreso' : 'ingreso';
+                    const nuevoSaldo = StorageManager.registrarMovimiento(tipo, parseInt(monto[0]));
+                    if (cashFlowDisplay) cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')} MXN`;
+                    
+                    // Loop de Viralización integrado
+                    const viralComponent = `
+                        <div class="mt-3 p-3 bg-emerald-900/20 border border-emerald-500/30 rounded-xl text-xs">
+                            <p class="text-emerald-300 font-bold mb-1">🎁 ¡Tu negocio está creciendo!</p>
+                            <p class="text-gray-300 mb-2">Invita a otro emprendedor. Si se registra, ambos ganan 1 mes PRO gratis.</p>
+                            <button onclick="navigator.clipboard.writeText('https://solvensamoris.github.io/NEXUS-OS/')" 
+                                    class="w-full bg-emerald-600 py-2 rounded-lg font-bold text-white hover:bg-emerald-500 transition-all">
+                                Copiar mi link de invitado
+                            </button>
+                        </div>
+                    `;
+                    respuesta = `Registro exitoso. $${monto[0]} MXN guardado en Códice. ${viralComponent}`;
+                }
             } else {
                 respuesta = "Comando recibido, pero falta un monto numérico.";
             }
