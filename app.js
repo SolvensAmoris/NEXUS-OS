@@ -8,12 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const chart = new Chart(ctx, {
         type: 'line',
-        data: { labels: ['Historial'], datasets: [{ data: [data.caja], borderColor: '#10B981', tension: 0.4 }] },
-        options: { plugins: { legend: { display: false } } }
+        data: { labels: ['Inicio'], datasets: [{ data: [data.caja], borderColor: '#10B981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.1)' }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
     });
 
     function refreshUI(nuevoSaldo) {
-        cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')} MXN`;
+        cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')}`;
         chart.data.datasets[0].data.push(nuevoSaldo);
         chart.update();
     }
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!texto) return;
         agregarMensaje(texto, true);
         input.value = '';
-        agregarMensaje("Analizando...", false, true);
+        agregarMensaje("Procesando...", false, true);
         
         const accion = await Agent.procesarInstruccion(texto);
         chatContainer.removeChild(chatContainer.lastChild);
@@ -43,10 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const monto = texto.match(/\d+/);
             const val = monto ? Agent.validarMonto(parseInt(monto[0])) : { valido: false };
             if (monto && val.valido) {
-                const nuevoSaldo = StorageManager.registrarMovimiento(texto.includes('gasto') ? 'egreso' : 'ingreso', parseInt(monto[0]));
+                const tipo = texto.toLowerCase().includes('gasto') ? 'egreso' : 'ingreso';
+                const montoVal = parseInt(monto[0]);
+                
+                // Guardado Local
+                const nuevoSaldo = StorageManager.registrarMovimiento(tipo, montoVal);
+                
+                // Guardado Cloud (Supabase)
+                await CloudManager.guardarVenta({ tipo, monto: montoVal, fecha: new Date().toISOString() });
+                
                 refreshUI(nuevoSaldo);
-                respuesta = `Registro exitoso. $${monto[0]} MXN en Códice. <div class="mt-3 p-3 bg-emerald-900/20 border border-emerald-500/30 rounded-xl text-xs">🎁 ¡Tu negocio crece! <button onclick="navigator.clipboard.writeText('https://solvensamoris.github.io/NEXUS-OS/')" class="w-full bg-emerald-600 mt-2 py-2 rounded-lg font-bold text-white">Copiar link de invitado</button></div>`;
-            } else { respuesta = "Error: Monto inválido."; }
+                respuesta = `Éxito. Saldo: $${nuevoSaldo.toLocaleString('es-MX')}. <div class="mt-3 p-3 bg-emerald-900/20 border border-emerald-500/30 rounded-xl text-xs"><p class="text-emerald-300 font-bold mb-1">🎁 ¡Tu negocio crece!</p><button onclick="navigator.clipboard.writeText('https://solvensamoris.github.io/NEXUS-OS/')" class="w-full bg-emerald-600 mt-2 py-2 rounded-lg font-bold text-white">Copiar link de invitado</button></div>`;
+            } else { respuesta = "Error: Monto inválido o no detectado."; }
         }
         setTimeout(() => agregarMensaje(respuesta, false), 300);
     });
