@@ -1,52 +1,53 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS OS | Business Copilot</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Core - México</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0B0F19; color: #E2E8F0; }
-        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(16, 185, 129, 0.2); }
-        ::-webkit-scrollbar { display: none; }
-    </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
-    <header class="p-4 glass-panel flex justify-between items-center z-10 border-b border-emerald-900/30">
-        <h1 class="text-xl font-black text-emerald-400 tracking-tighter">NEXUS OS</h1>
-        <div class="flex items-center gap-3">
-            <div class="text-right">
-                <span class="text-slate-500 text-[9px] block uppercase">Flujo Caja</span>
-                <span class="font-bold text-amber-400 text-sm" id="cash-flow">$0.00</span>
-            </div>
-        </div>
-    </header>
+<body>
+    <div id="app" class="grimorio-container">
+        <header>
+            <h1>NEXUS OS OMEGA</h1>
+            <p class="subtitle">Núcleo de Operaciones Localizado (MXN)</p>
+        </header>
 
-    <div id="report-panel" class="px-4 py-3 overflow-y-auto">
-        <div class="glass-panel p-3 rounded-2xl">
-            <canvas id="myChart" height="70"></canvas>
-        </div>
-        <div id="upgrade-banner" class="mt-4 p-4 bg-emerald-900/20 border border-emerald-500 rounded-xl text-center">
-            <p class="text-xs text-emerald-400 font-bold uppercase tracking-widest">¿Quieres reportes detallados?</p>
-            <p class="text-[10px] text-slate-400 mt-1">Desbloquea análisis anual y exportación premium.</p>
-            <button class="mt-2 bg-emerald-600 w-full py-2 rounded-lg text-[11px] font-bold text-white">ACTUALIZAR A PRO - $99 MXN</button>
-        </div>
+        <main>
+            <section id="auth-section" class="card">
+                <h2>Portal de Acceso</h2>
+                <input type="email" id="email" placeholder="Correo electrónico">
+                <input type="password" id="password" placeholder="Contraseña">
+                <div class="actions">
+                    <button id="btn-login" onclick="core.login()">Transmutar Entrada</button>
+                    <button id="btn-register" onclick="core.register()">Registrar Grimorio</button>
+                </div>
+            </section>
+
+            <section id="dashboard-section" class="card hidden">
+                <h2>Panel de Control</h2>
+                <p>Bienvenido: <span id="user-display"></span></p>
+                <p>Divisa Base: <strong>MXN ($)</strong></p>
+                <button onclick="core.logout()" class="btn-danger">Cerrar Portal</button>
+            </section>
+
+            <section id="premium-section" class="card hidden" style="border-color: var(--accent-gold); margin-top: 20px;">
+                <h2>Núcleo Clasificado</h2>
+                <p>Estado del Pacto: <span id="status-display" style="font-weight: bold;">Verificando runas...</span></p>
+                
+                <div id="premium-content" class="hidden" style="margin-top: 15px; padding: 15px; background: #1a1a1e; border-radius: 6px;">
+                    <h3 style="color: var(--accent-gold); margin-top: 0;">Información de Alto Nivel</h3>
+                    <p>Bienvenido al círculo interno. Este artefacto es visible únicamente para entidades con nivel de acceso 'paid'.</p>
+                    </div>
+
+                <button id="btn-pay" onclick="core.iniciarPago()" class="hidden" style="margin-top: 15px;">
+                    Forjar Alianza (Pagar con Tarjeta/OXXO)
+                </button>
+            </section>
+        </main>
     </div>
-
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col pb-32"></main>
-
-    <footer class="fixed bottom-0 w-full p-4 bg-[#0B0F19] border-t border-emerald-900/30">
-        <form id="nexus-form" class="flex gap-2 mb-4">
-            <input type="text" id="user-input" autocomplete="off" placeholder="Ej: Venta 500 a Juan..." class="flex-1 bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500">
-            <button type="submit" class="bg-emerald-600 text-white rounded-xl px-4 py-3 hover:bg-emerald-500 transition-all">Enviar</button>
-        </form>
-    </footer>
-
-    <script src="storage/cloud.js"></script>
-    <script src="agents/agent.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
