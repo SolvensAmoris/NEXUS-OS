@@ -1,0 +1,54 @@
+export const config = {
+  // Define el perímetro de protección. Intercepta todo dentro de /premium/
+  matcher: '/premium/:path*',
+};
+
+export default async function middleware(request) {
+  // 1. Extracción del Sello Dimensional (Cookie)
+  const cookies = request.headers.get('cookie') || '';
+  const tokenMatch = cookies.match(/nexus-auth-token=([^;]+)/);
+
+  if (!tokenMatch) {
+    return new Response('401: Sello Ausente. Acceso Denegado al Círculo Interno.', { status: 401 });
+  }
+
+  const token = tokenMatch[1];
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+  try {
+    // 2. Verificación de Autenticidad (Oráculo Auth)
+    const authCheck = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': supabaseKey,
+      },
+    });
+
+    if (!authCheck.ok) {
+      return new Response('401: Sello Corrupto o Expirado.', { status: 401 });
+    }
+
+    const user = await authCheck.json();
+
+    // 3. Verificación de Nivel de Acceso (Lectura REST DB protegida por RLS del usuario)
+    const dbCheck = await fetch(`${supabaseUrl}/rest/v1/suscripciones?select=estado_pago&user_id=eq.${user.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': supabaseKey,
+      },
+    });
+
+    const dbData = await dbCheck.json();
+
+    if (!dbData || dbData.length === 0 || dbData[0].estado_pago !== 'paid') {
+      return new Response('403: Pacto Incompleto. Requiere alianza activa (paid).', { status: 403 });
+    }
+
+    // 4. Convergencia Exitosa: Permitir el paso del Request al sistema de archivos estático
+    return; 
+    
+  } catch (error) {
+    return new Response('500: Falla en la red del oráculo.', { status: 500 });
+  }
+}
