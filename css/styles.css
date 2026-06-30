@@ -1,0 +1,24 @@
+/* Importar tipografía limpia y corporativa */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: #0B0F19; 
+    color: #E2E8F0; 
+}
+
+/* Efectos visuales de NEXUS */
+.nexus-glow { 
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); 
+}
+
+.glass-panel { 
+    background: rgba(15, 23, 42, 0.8); 
+    backdrop-filter: blur(12px); 
+    border: 1px solid rgba(16, 185, 129, 0.2); 
+}
+
+/* Ocultar scrollbar para que parezca app nativa en iOS/Android */
+::-webkit-scrollbar { 
+    display: none; 
+}
