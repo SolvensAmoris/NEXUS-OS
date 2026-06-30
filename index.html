@@ -21,30 +21,25 @@
                 <input type="email" id="email" placeholder="Correo electrónico">
                 <input type="password" id="password" placeholder="Contraseña">
                 <div class="actions">
-                    <button id="btn-login" onclick="core.login()">Transmutar Entrada</button>
-                    <button id="btn-register" onclick="core.register()">Registrar Grimorio</button>
+                    <button onclick="core.login()">Transmutar Entrada</button>
+                    <button onclick="core.register()">Registrar Grimorio</button>
                 </div>
             </section>
 
             <section id="dashboard-section" class="card hidden">
                 <h2>Panel de Control</h2>
                 <p>Bienvenido: <span id="user-display"></span></p>
-                <p>Divisa Base: <strong>MXN ($)</strong></p>
                 <button onclick="core.logout()" class="btn-danger">Cerrar Portal</button>
             </section>
 
             <section id="premium-section" class="card hidden" style="border-color: var(--accent-gold); margin-top: 20px;">
                 <h2>Núcleo Clasificado</h2>
-                <p>Estado del Pacto: <span id="status-display" style="font-weight: bold;">Verificando runas...</span></p>
-                
-                <div id="premium-content" class="hidden" style="margin-top: 15px; padding: 15px; background: #1a1a1e; border-radius: 6px;">
-                    <h3 style="color: var(--accent-gold); margin-top: 0;">Información de Alto Nivel</h3>
-                    <p>Bienvenido al círculo interno. Este artefacto es visible únicamente para entidades con nivel de acceso 'paid'.</p>
-                    </div>
-
-                <button id="btn-pay" onclick="core.iniciarPago()" class="hidden" style="margin-top: 15px;">
-                    Forjar Alianza (Pagar con Tarjeta/OXXO)
-                </button>
+                <p>Estado: <span id="status-display">...</span></p>
+                <div id="premium-content" class="hidden">
+                    <p>Acceso concedido al círculo interno.</p>
+                    <button id="btn-portal" onclick="core.gestionarPortal()" style="background: #2563eb;">Gestionar Alianza</button>
+                </div>
+                <button id="btn-pay" onclick="core.iniciarPago()" class="hidden">Forjar Alianza (Pagar)</button>
             </section>
         </main>
     </div>
