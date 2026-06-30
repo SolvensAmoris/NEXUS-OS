@@ -4,17 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('user-input');
     const cashFlowDisplay = document.getElementById('cash-flow');
 
-    // Dashboard Dinámico: Cargar datos reales
     const Dashboard = {
         actualizar: async function() {
             const { data, error } = await supabase.from('ventas').select('monto, tipo');
             if (error) return;
-
             let saldo = 0;
-            data.forEach(v => {
-                if (v.tipo === 'ingreso') saldo += v.monto;
-                if (v.tipo === 'egreso') saldo -= v.monto;
-            });
+            data.forEach(v => { v.tipo === 'ingreso' ? saldo += v.monto : saldo -= v.monto; });
             cashFlowDisplay.textContent = `$${saldo.toLocaleString()}`;
         }
     };
@@ -33,8 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (accion.comando === 'REGISTRO_CONTABLE') {
             await CloudManager.guardarVenta(accion.datos);
-            await Dashboard.actualizar(); // Recalcular saldo
+            await Dashboard.actualizar();
             agregarMensaje(accion.plantilla);
+            
+            // Mecanismo de Viralización: Ofrecer compartir
+            if (navigator.share) {
+                setTimeout(() => {
+                    if (confirm("¿Quieres compartir este movimiento y promocionar NEXUS OS?")) {
+                        navigator.share({
+                            title: 'NEXUS OS',
+                            text: `Acabo de registrar: ${accion.plantilla}. ¡Llevo mi negocio con NEXUS OS!`,
+                            url: 'https://solvensamoris.github.io/'
+                        });
+                    }
+                }, 1000);
+            }
         } else {
             agregarMensaje(accion.plantilla);
         }
