@@ -22,7 +22,7 @@ const StorageManager = {
         data.transacciones.forEach(row => { csvContent += `${row.id},${row.tipo},${row.monto},${row.fecha}\n`; });
         const link = document.createElement("a");
         link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", "reporte_nexus_os.csv");
+        link.setAttribute("download", "NEXUS_OS_Reporte.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
