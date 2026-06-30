@@ -2,19 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatContainer = document.getElementById('chat-container');
     const form = document.getElementById('nexus-form');
     const input = document.getElementById('user-input');
-    const cashFlowDisplay = document.getElementById('cash-flow');
-
-    const Dashboard = {
-        actualizar: async function() {
-            const { data, error } = await supabase.from('ventas').select('monto, tipo');
-            if (error) return;
-            let saldo = 0;
-            data.forEach(v => { v.tipo === 'ingreso' ? saldo += v.monto : saldo -= v.monto; });
-            cashFlowDisplay.textContent = `$${saldo.toLocaleString()}`;
-        }
-    };
-
-    Dashboard.actualizar();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -26,18 +13,30 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const accion = await Agent.procesarInstruccion(texto);
         
-        if (accion.comando === 'REGISTRO_CONTABLE') {
+        // Lógica para manejar reporte o registro
+        if (accion.comando === 'REPORTE_EJECUTIVO') {
+            const { data, error } = await supabase.from('ventas').select('monto, cliente, estado').eq('estado', 'credito');
+            if (error) {
+                agregarMensaje("❌ Error al consultar cuentas.");
+            } else {
+                let mensajeResumen = "📊 **Cuentas por Cobrar:**\n";
+                if (data.length === 0) {
+                    mensajeResumen = "✅ No tienes deudas pendientes.";
+                } else {
+                    data.forEach(v => mensajeResumen += `- ${v.cliente.toUpperCase()}: $${v.monto}\n`);
+                }
+                agregarMensaje(mensajeResumen);
+            }
+        } else if (accion.comando === 'REGISTRO_CONTABLE') {
             await CloudManager.guardarVenta(accion.datos);
-            await Dashboard.actualizar();
             agregarMensaje(accion.plantilla);
             
-            // Mecanismo de viralización (BOFU)
             if (navigator.share) {
                 setTimeout(() => {
-                    if (confirm("¿Quieres compartir este registro y promocionar NEXUS OS?")) {
+                    if (confirm("¿Quieres compartir este registro?")) {
                         navigator.share({
                             title: 'NEXUS OS',
-                            text: `Acabo de registrar: ${accion.plantilla}. ¡Llevo mi negocio con NEXUS OS!`,
+                            text: `Registro: ${accion.plantilla}. ¡Uso NEXUS OS!`,
                             url: 'https://solvensamoris.github.io/'
                         });
                     }
