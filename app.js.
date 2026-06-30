@@ -1,26 +1,76 @@
 // NEXUS OS - CAPA 2 & 5: CONTEXT ENGINE & COPILOT UI
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar memoria desde el almacenamiento local
     const data = StorageManager.init();
+    
     const chatContainer = document.getElementById('chat-container');
     const form = document.getElementById('nexus-form');
     const input = document.getElementById('user-input');
     const cashFlowDisplay = document.getElementById('cash-flow');
+    const pricingScreen = document.getElementById('pricing-screen');
 
-    if (cashFlowDisplay) cashFlowDisplay.textContent = `$${data.caja.toLocaleString('es-MX')} MXN`;
+    // Cargar saldo contable actual en pantalla
+    if (cashFlowDisplay) {
+        cashFlowDisplay.textContent = `$${data.caja.toLocaleString('es-MX')} MXN`;
+    }
 
     function agregarMensaje(texto, esUsuario = false) {
         if (!chatContainer) return;
         const div = document.createElement('div');
         div.className = `flex gap-3 ${esUsuario ? 'flex-row-reverse' : ''} mb-4`;
+        
         div.innerHTML = `
-            <div class="w-8 h-8 rounded border border-emerald-500 bg-slate-800 flex items-center justify-center text-emerald-400 font-bold shrink-0">
+            <div class="w-8 h-8 rounded border ${esUsuario ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-emerald-500 bg-slate-800 text-emerald-400'} flex items-center justify-center font-bold shrink-0 text-xs">
                 ${esUsuario ? 'Tú' : 'N'}
             </div>
-            <div class="${esUsuario ? 'bg-slate-800 p-3 rounded-2xl rounded-tr-none text-sm' : 'glass-panel p-3 rounded-2xl rounded-tl-none text-sm'}">
+            <div class="${esUsuario ? 'bg-slate-800 border border-slate-700' : 'glass-panel text-emerald-50'} p-3 rounded-2xl ${esUsuario ? 'rounded-tr-none' : 'rounded-tl-none'} text-sm max-w-[85%] leading-relaxed">
                 ${texto}
-            </div>`;
+            </div>
+        `;
         chatContainer.appendChild(div);
         chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    async function procesarInput(texto) {
+        // Consultar estado actual del Códice
+        const estadoActual = StorageManager.getData();
+
+        // Trigger BOFU: Bloqueo suave si excede los 5 créditos gratuitos del embudo
+        if (estadoActual.transacciones && estadoActual.transacciones.length >= 5) {
+            if (pricingScreen) pricingScreen.classList.remove('hidden');
+            return;
+        }
+
+        // Llamar al motor de la Capa 4: Automation Agent para clasificar la instrucción
+        const accion = await Agent.procesarInstruccion(texto);
+        let respuesta = "";
+
+        if (accion.comando === 'ENVIAR_WHATSAPP') {
+            respuesta = `📢 [Protocolo WhatsApp] Preparando canal autónomo de mensajería. Listo para enlazar respuesta con el cliente de forma externa.`;
+        } 
+        else if (accion.comando === 'GENERAR_FACTURA') {
+            respuesta = `📄 [Protocolo SAT] Estructurando datos fiscales en memoria del Códice. Listo para exportar pre-factura.`;
+        } 
+        else {
+            // Lógica contable básica predeterminada
+            const numeros = texto.match(/\d+/);
+            const monto = numeros ? parseInt(numeros[0]) : null;
+
+            if (monto) {
+                const tipoMovimiento = (texto.toLowerCase().includes('gasto') || texto.toLowerCase().includes('compra')) ? 'egreso' : 'ingreso';
+                const nuevoSaldo = StorageManager.registrarMovimiento(tipoMovimiento, monto);
+                
+                if (cashFlowDisplay) {
+                    cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')} MXN`;
+                }
+                respuesta = `Movimiento registrado vía Agente en tu base de datos local. Balance actualizado.`;
+            } else {
+                respuesta = "Comando procesado por NEXUS Core, pero no detecté un monto numérico para afectar el flujo de caja.";
+            }
+        }
+
+        // Simulación de retraso de procesamiento cognitivo de la IA
+        setTimeout(() => agregarMensaje(respuesta, false), 500);
     }
 
     form.addEventListener('submit', (e) => {
@@ -30,15 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         agregarMensaje(texto, true);
         input.value = '';
-        
-        // Lógica de respuesta simple
-        const monto = texto.match(/\d+/);
-        if (monto) {
-            const nuevoSaldo = StorageManager.registrarMovimiento(texto.includes('gasto') ? 'egreso' : 'ingreso', parseInt(monto[0]));
-            if (cashFlowDisplay) cashFlowDisplay.textContent = `$${nuevoSaldo.toLocaleString('es-MX')} MXN`;
-            agregarMensaje(`Movimiento registrado. Saldo actualizado.`);
-        } else {
-            agregarMensaje("No detecté un monto. ¿Fue ingreso o gasto?");
-        }
+        procesarInput(texto);
     });
 });
