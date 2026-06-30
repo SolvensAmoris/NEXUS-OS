@@ -33,15 +33,20 @@
         </div>
     </div>
 
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col pb-24"></main>
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col pb-32"></main>
 
     <footer class="fixed bottom-0 w-full p-4 bg-[#0B0F19] border-t border-emerald-900/30">
-        <form id="nexus-form" class="flex gap-2">
+        <form id="nexus-form" class="flex gap-2 mb-4">
             <input type="text" id="user-input" autocomplete="off" placeholder="Ej: Venta 500..." class="flex-1 bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500">
             <button type="submit" class="bg-emerald-600 text-white rounded-xl px-4 py-3 hover:bg-emerald-500 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
             </button>
         </form>
+        <div class="text-center">
+            <p class="text-[9px] text-slate-600 uppercase tracking-widest">
+                © 2026 Solvens Amoris. Todos los derechos reservados.
+            </p>
+        </div>
     </footer>
 
     <script src="/storage/storage.js"></script>
